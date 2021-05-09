@@ -31,7 +31,7 @@ PROPFILE=true
 POSTFSDATA=false
 
 # Set to true if you need late_start service script
-LATESTARTSERVICE=false
+LATESTARTSERVICE=true
 
 ##########################################################################################
 # Replace list
@@ -136,6 +136,11 @@ on_install() {
   if [ "ranchu" != $KERNEL ]; then
     abort "Only support Android Virtual Devices (AVD)"
   fi
+
+  RELEASE=$(getprop ro.build.version.release)
+  if [ "10" != $RELEASE ]; then
+    abort "Only support Android 10"
+  fi 
  
   ui_print "- Extracting LibNDK Translation Files"
   unzip -o "$ZIPFILE" 'system/*' -d $MODPATH >&2
@@ -145,18 +150,21 @@ on_install() {
 # This function will be called after on_install is done
 # The default permissions should be good enough for most cases
 
-set_permissions() {
+#set_permissions() {
   # The following is the default rule, DO NOT remove
-  set_perm_recursive $MODPATH 0 0 0755 0644
+  #set_perm_recursive $MODPATH 0 0 0755 0644
   #set_perm <target> <owner> <group> <permission> [context]
-  #set_perm $MODPATH/system/vendor/etc/permissions/android.hardware.usb.host.xml 0  0  0644  u:object_r:vendor_configs_file:s0
-  #set_perm $MODPATH/system/vendor/etc/fstab.ranchu 0  0  0644  u:object_r:vendor_configs_file:s0
+  ui_print "- setting Permissions"
+  set_perm_recursive $MODPATH/system/bin 0 2000 0755 0755  
+  set_perm_recursive $MODPATH/system/etc 0 0 0755 0644
+  set_perm_recursive $MODPATH/system/lib 0 0 0755 0644
+  set_perm_recursive $MODPATH/system/lib64 0 0 0755 0644
 
   # Here are some examples:
   # set_perm_recursive  $MODPATH/system/lib       0     0       0755      0644
   # set_perm  $MODPATH/system/bin/app_process32   0     2000    0755      u:object_r:zygote_exec:s0
   # set_perm  $MODPATH/system/bin/dex2oat         0     2000    0755      u:object_r:dex2oat_exec:s0
   # set_perm  $MODPATH/system/lib/libart.so       0     0       0644
-}
+#}
 
 # You can add more functions to assist your custom script code
